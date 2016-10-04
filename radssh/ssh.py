@@ -136,6 +136,20 @@ class Chunker(object):
         yield self.data[-1]
 
 
+session_prompts = {}
+prompt_lock = threading.Lock()
+
+def user_prompt(buffers):
+    with prompt_lock:
+        if buffers in session_prompts:
+            return session_prompts[buffers]
+        password = user_password(str(buffers))
+        if not password:
+            return None
+        session_prompts[buffers] = password
+        return password
+
+
 def run_local_command(original_name, remote_hostname, port, remote_username, sshconfig):
     '''
     Handle preparing command line to run on connecting to remote host. This
@@ -319,6 +333,8 @@ def exec_command(host, t, cmd, quota, streamQ, encoding='UTF-8'):
             s = t.open_session()
             s.set_name(t.getName())
             xcmd = cmd
+            # Needed for sudo requiring a TTY, but loses independent stderr stream...
+            s.get_pty()
             s.exec_command(xcmd)
         stdout_eof = stderr_eof = False
         quiet_increment = 0.4
@@ -346,6 +362,15 @@ def exec_command(host, t, cmd, quota, streamQ, encoding='UTF-8'):
                 # Push out a (nothing) in case the queue needs to do a time-based dump
                 stdout.push('')
                 quiet_time += quiet_increment
+                if quiet_time > 2.0:
+                    # See if remote side is waiting on something that looks like a prompt
+                    partial_stdout = stdout.pull(0, True)
+                    partial_stderr = stderr.pull(0, True)
+                    if partial_stdout or partial_stderr:
+                        response = user_prompt((partial_stdout, partial_stderr))
+                        if response:
+                            s.send(response + '\n')
+                        #print(partial_stdout, partial_stderr)
                 try:
                     if quiet_time > 5.0:
                         keepalive.ping()

@@ -88,16 +88,18 @@ class StreamBuffer(object):
                     self.line_count += pending[:pos].count(self.delimiter)
                     self.marker += 1 + pos
 
-    def pull(self, size=0):
+    def pull(self, size=0, view_only=False):
         '''Non-queue access to accumulated data as bytes'''
         if not self.active and self.pull_marker == len(self.buffer):
             raise EOFError
         data = self.buffer[self.pull_marker:]
         if size == 0 or self.pull_marker + size <= len(self.buffer):
             # Return all pending data
-            self.pull_marker = len(self.buffer)
+            if not view_only:
+                self.pull_marker = len(self.buffer)
             return data
-        self.pull_marker += size
+        if not view_only:
+            self.pull_marker += size
         return data[:size]
 
     def rewind(self, position=0):
