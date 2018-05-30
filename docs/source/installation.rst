@@ -23,7 +23,7 @@ CentOS requires additional depencies:
 ``sudo yum install -y python-devel libffi-devel openssl-devel``
 
 Mac OS X
-1) Avoid installing pip from homebrew, instead install pip following the documentation found at
+1) Avoid installing pip from homebrew, instead install pip following the documentation found at:
 https://pip.readthedocs.io/en/stable/installing/
 2) pip install radssh (without sudo)
 
