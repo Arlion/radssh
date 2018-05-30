@@ -16,11 +16,16 @@ Installing from PyPI
 
 If you are installing to a virtual environment, be sure to activate the environment prior to running pip.
 
-Ubuntu needs some additional dependencies:
+Ubuntu requires additional dependencies:
 ``sudo apt-get install libssl-dev python-dev libffi-dev -y``
 
 CentOS requires additional depencies:
-``sudo yum install -y python-devel libffi-devel openssl-devel
+``sudo yum install -y python-devel libffi-devel openssl-devel``
+
+Mac OS X
+1) Avoid installing pip from homebrew, instead install pip following the documentation found at
+https://pip.readthedocs.io/en/stable/installing/
+2) pip install radssh (without sudo)
 
 Run the command (with sudo, if needed): ``pip install radssh``
 
